@@ -1,17 +1,17 @@
 {
   "compilerOptions": {
     "target": "es2016",
-    "module": "commonjs",
-    "allowJs": true,
-    "outDir": "dist",
-    "rootDirs": ["./src", "./tests"],
-    "removeComments": true,
-    "baseUrl": "./",
-    "esModuleInterop": true,
-    "noImplicitAny": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "module": "commonjs",
+    "rootDirs": ["./src"],
+    "baseUrl": "./src",
+    "typeRoots": ["./node_modules/@types"],
+    "resolveJsonModule": true,
+    "outDir": "./dist",
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "strict": true,
     "skipLibCheck": true
   }
 }
