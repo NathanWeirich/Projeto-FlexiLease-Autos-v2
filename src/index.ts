@@ -1,10 +1,18 @@
-import app from "./app";
+import express from "express";
+import cors from "cors";
+import routes from "./routes/routes";
 import connectDB from "./config/db";
 
-const PORT = process.env.PORT || 3000;
+const app = express();
 
-// Connect Database
+app.use(cors());
+app.use(express.json());
+
 connectDB();
+
+app.use(routes);
+
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
