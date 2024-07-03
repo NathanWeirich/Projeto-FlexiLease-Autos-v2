@@ -1,6 +1,7 @@
 import { Router } from "express";
 import CarController from "../controllers/car.controller";
 import { CarService } from "../services/CarService";
+import { validateCar } from "../validation/carValidation";
 
 const router = Router();
 const carService = new CarService();
@@ -76,7 +77,7 @@ const carController = new CarController(carService);
  *       400:
  *         description: Invalid data
  */
-router.post("/car", carController.registerCar.bind(carController));
+router.post("/car", validateCar, carController.registerCar.bind(carController));
 
 /**
  * @swagger
@@ -189,7 +190,11 @@ router.delete("/car/:id", carController.deleteCar.bind(carController));
  *       404:
  *         description: Car not found
  */
-router.put("/car/:id", carController.updateCar.bind(carController));
+router.put(
+  "/car/:id",
+  validateCar,
+  carController.updateCar.bind(carController),
+);
 
 /**
  * @swagger
