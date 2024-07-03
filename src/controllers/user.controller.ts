@@ -46,6 +46,23 @@ class UserController {
       }
     }
   }
+
+  async updateUser(req: Request, res: Response) {
+    const { id } = req.params;
+    try {
+      const updatedUser = await this.userService.updateUser(id, req.body);
+      if (!updatedUser) {
+        return res.status(404).send({ error: "User not found" });
+      }
+      res.status(200).send(updatedUser);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).send({ error: error.message });
+      } else {
+        res.status(400).send({ error: "An unknown error occurred" });
+      }
+    }
+  }
 }
 
 export default UserController;

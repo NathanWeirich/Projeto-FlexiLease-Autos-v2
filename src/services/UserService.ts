@@ -54,4 +54,42 @@ export class UserService {
     }
     return await User.findById(id, "-password").exec();
   }
+
+  async updateUser(
+    id: string,
+    userData: Partial<IUser>,
+  ): Promise<IUser | null> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error("Invalid ID format");
+    }
+
+    // Verificar se o e-mail já existe para outro usuário
+    if (userData.email) {
+      const emailExists = await User.findOne({
+        email: userData.email,
+        _id: { $ne: id },
+      });
+      if (emailExists) {
+        throw new Error("Email already exists");
+      }
+    }
+
+    // Verificar se o CPF já existe para outro usuário
+    if (userData.cpf) {
+      const cpfExists = await User.findOne({
+        cpf: userData.cpf,
+        _id: { $ne: id },
+      });
+      if (cpfExists) {
+        throw new Error("CPF already exists");
+      }
+    }
+
+    if (userData.password) {
+      const salt = await bcrypt.genSalt(10);
+      userData.password = await bcrypt.hash(userData.password, salt);
+    }
+
+    return await User.findByIdAndUpdate(id, userData, { new: true }).exec();
+  }
 }
