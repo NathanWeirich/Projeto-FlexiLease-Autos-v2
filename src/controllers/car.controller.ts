@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CarService } from "../services/carService";
+import { CarService } from "../services/CarService";
 import mongoose from "mongoose";
 
 class CarController {
@@ -106,6 +106,40 @@ class CarController {
         return res.status(404).send({ error: "Car not found" });
       }
       res.status(200).send(updatedCar);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).send({ error: error.message });
+      } else {
+        res.status(400).send({ error: "An unknown error occurred" });
+      }
+    }
+  }
+
+  async updateAccessory(req: Request, res: Response) {
+    const { id, accessoryId } = req.params;
+    const { description } = req.body;
+
+    if (
+      !mongoose.Types.ObjectId.isValid(id) ||
+      !mongoose.Types.ObjectId.isValid(accessoryId)
+    ) {
+      return res.status(400).send({ error: "Invalid ID format" });
+    }
+
+    if (!description) {
+      return res.status(400).send({ error: "Description is required" });
+    }
+
+    try {
+      const updatedCar = await this.carService.updateAccessory(
+        id,
+        accessoryId,
+        description,
+      );
+      if (!updatedCar) {
+        return res.status(404).send({ error: "Car or accessory not found" });
+      }
+      res.status(200).send({ car: updatedCar, accessoryId });
     } catch (error: unknown) {
       if (error instanceof Error) {
         res.status(400).send({ error: error.message });

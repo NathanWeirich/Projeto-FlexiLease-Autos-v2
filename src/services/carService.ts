@@ -32,4 +32,32 @@ export class CarService {
       runValidators: true,
     }).exec();
   }
+
+  async updateAccessory(
+    carId: string,
+    accessoryId: string,
+    description: string,
+  ): Promise<ICar | null> {
+    const car = await Car.findById(carId).exec();
+    if (!car) {
+      return null;
+    }
+
+    const accessoryIndex = car.accessories.findIndex(
+      (a) => a._id.toString() === accessoryId,
+    );
+
+    if (accessoryIndex > -1) {
+      if (car.accessories[accessoryIndex].description === description) {
+        car.accessories.splice(accessoryIndex, 1);
+      } else {
+        car.accessories[accessoryIndex].description = description;
+      }
+    } else {
+      car.accessories.push({ _id: accessoryId, description });
+    }
+
+    await car.save();
+    return car;
+  }
 }
