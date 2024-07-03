@@ -92,4 +92,11 @@ export class UserService {
 
     return await User.findByIdAndUpdate(id, userData, { new: true }).exec();
   }
+
+  async deleteUser(id: string): Promise<IUser | null> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error("Invalid ID format");
+    }
+    return await User.findByIdAndDelete(id).exec();
+  }
 }

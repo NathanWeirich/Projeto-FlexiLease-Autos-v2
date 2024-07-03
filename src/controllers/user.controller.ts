@@ -63,6 +63,23 @@ class UserController {
       }
     }
   }
+
+  async deleteUser(req: Request, res: Response) {
+    const { id } = req.params;
+    try {
+      const deletedUser = await this.userService.deleteUser(id);
+      if (!deletedUser) {
+        return res.status(404).send({ error: "User not found" });
+      }
+      res.status(204).send();
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).send({ error: error.message });
+      } else {
+        res.status(400).send({ error: "An unknown error occurred" });
+      }
+    }
+  }
 }
 
 export default UserController;
