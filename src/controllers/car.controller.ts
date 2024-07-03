@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CarService } from "../services/CarService";
+import { CarService } from "../services/carService";
 import mongoose from "mongoose";
 
 class CarController {
@@ -62,6 +62,28 @@ class CarController {
         return res.status(404).send({ error: "Car not found" });
       }
       res.status(200).send(car);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(500).send({ error: error.message });
+      } else {
+        res.status(500).send({ error: "An unknown error occurred" });
+      }
+    }
+  }
+
+  async deleteCar(req: Request, res: Response) {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).send({ error: "Invalid ID format" });
+    }
+
+    try {
+      const car = await this.carService.deleteCar(id);
+      if (!car) {
+        return res.status(404).send({ error: "Car not found" });
+      }
+      res.status(204).send();
     } catch (error: unknown) {
       if (error instanceof Error) {
         res.status(500).send({ error: error.message });

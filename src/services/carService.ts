@@ -8,13 +8,21 @@ export class CarService {
     return car;
   }
 
-  async getCars(query: any, limit: number, offset: number) {
+  async getCars(
+    query: any,
+    limit: number,
+    offset: number,
+  ): Promise<{ cars: ICar[]; total: number }> {
     const cars = await Car.find(query).limit(limit).skip(offset).exec();
     const total = await Car.countDocuments(query);
     return { cars, total };
   }
 
-  async getCarById(id: string) {
+  async getCarById(id: string): Promise<ICar | null> {
     return await Car.findById(id).exec();
+  }
+
+  async deleteCar(id: string): Promise<ICar | null> {
+    return await Car.findByIdAndDelete(id).exec();
   }
 }
