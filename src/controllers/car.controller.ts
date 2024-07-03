@@ -20,12 +20,24 @@ class CarController {
 
   async getCars(req: Request, res: Response) {
     try {
-      const { model, color, year, limit = 10, offset = 0 } = req.query;
+      const {
+        model,
+        color,
+        year,
+        value_per_day,
+        accessories,
+        limit = 10,
+        offset = 0,
+      } = req.query;
+
       const query: any = {};
 
       if (model) query.model = model;
       if (color) query.color = color;
       if (year) query.year = year;
+      if (value_per_day) query.value_per_day = value_per_day;
+      if (accessories)
+        query.accessories = { $elemMatch: { description: accessories } };
 
       const { cars, total } = await this.carService.getCars(
         query,
