@@ -16,6 +16,36 @@ class UserController {
       }
     }
   }
+
+  async getAllUsers(req: Request, res: Response) {
+    try {
+      const users = await this.userService.getAllUsers();
+      res.status(200).send(users);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(500).send({ error: error.message });
+      } else {
+        res.status(500).send({ error: "An unknown error occurred" });
+      }
+    }
+  }
+
+  async getUserById(req: Request, res: Response) {
+    const { id } = req.params;
+    try {
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        return res.status(404).send({ error: "User not found" });
+      }
+      res.status(200).send(user);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).send({ error: error.message });
+      } else {
+        res.status(400).send({ error: "An unknown error occurred" });
+      }
+    }
+  }
 }
 
 export default UserController;

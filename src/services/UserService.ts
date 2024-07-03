@@ -2,6 +2,7 @@ import axios from "axios";
 import bcrypt from "bcrypt";
 import User from "../models/User";
 import { IUser } from "../interfaces/IUser";
+import mongoose from "mongoose";
 
 export class UserService {
   async registerUser(userData: IUser) {
@@ -41,5 +42,16 @@ export class UserService {
     const user = new User(userData);
     await user.save();
     return user;
+  }
+
+  async getAllUsers(): Promise<IUser[]> {
+    return await User.find({}, "-password").exec();
+  }
+
+  async getUserById(id: string): Promise<IUser | null> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error("Invalid ID format");
+    }
+    return await User.findById(id, "-password").exec();
   }
 }
