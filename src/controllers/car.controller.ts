@@ -92,6 +92,28 @@ class CarController {
       }
     }
   }
+
+  async updateCar(req: Request, res: Response) {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).send({ error: "Invalid ID format" });
+    }
+
+    try {
+      const updatedCar = await this.carService.updateCar(id, req.body);
+      if (!updatedCar) {
+        return res.status(404).send({ error: "Car not found" });
+      }
+      res.status(200).send(updatedCar);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).send({ error: error.message });
+      } else {
+        res.status(400).send({ error: "An unknown error occurred" });
+      }
+    }
+  }
 }
 
 export default CarController;

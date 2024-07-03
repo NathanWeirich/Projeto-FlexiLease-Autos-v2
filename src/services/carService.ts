@@ -25,4 +25,11 @@ export class CarService {
   async deleteCar(id: string): Promise<ICar | null> {
     return await Car.findByIdAndDelete(id).exec();
   }
+
+  async updateCar(id: string, carData: Partial<ICar>): Promise<ICar | null> {
+    return await Car.findByIdAndUpdate(id, carData, {
+      new: true,
+      runValidators: true,
+    }).exec();
+  }
 }
