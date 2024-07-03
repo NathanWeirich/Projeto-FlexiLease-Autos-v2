@@ -1,5 +1,6 @@
 import axios from "axios";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import User from "../models/User";
 import { IUser } from "../interfaces/IUser";
 import mongoose from "mongoose";
@@ -108,5 +109,25 @@ export class UserService {
       throw new Error("Invalid ID format");
     }
     return await User.findByIdAndDelete(id).exec();
+  }
+
+  async authenticateUser(
+    email: string,
+    password: string,
+  ): Promise<string | null> {
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new Error("Invalid email or password");
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      throw new Error("Invalid email or password");
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {
+      expiresIn: "12h",
+    });
+    return token;
   }
 }

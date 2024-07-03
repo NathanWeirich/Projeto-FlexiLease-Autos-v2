@@ -84,6 +84,20 @@ class UserController {
       }
     }
   }
+
+  async authenticateUser(req: Request, res: Response) {
+    const { email, password } = req.body;
+    try {
+      const token = await this.userService.authenticateUser(email, password);
+      res.status(200).send({ token });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).send({ error: error.message });
+      } else {
+        res.status(400).send({ error: "An unknown error occurred" });
+      }
+    }
+  }
 }
 
 export default UserController;
