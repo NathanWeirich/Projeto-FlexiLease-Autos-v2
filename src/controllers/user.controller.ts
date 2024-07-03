@@ -18,9 +18,13 @@ class UserController {
   }
 
   async getAllUsers(req: Request, res: Response) {
+    const { page = 1, limit = 10 } = req.query;
     try {
-      const users = await this.userService.getAllUsers();
-      res.status(200).send(users);
+      const paginatedResult = await this.userService.getAllUsers(
+        Number(page),
+        Number(limit),
+      );
+      res.status(200).send(paginatedResult);
     } catch (error: unknown) {
       if (error instanceof Error) {
         res.status(500).send({ error: error.message });

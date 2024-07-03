@@ -44,8 +44,18 @@ export class UserService {
     return user;
   }
 
-  async getAllUsers(): Promise<IUser[]> {
-    return await User.find({}, "-password").exec();
+  async getAllUsers(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ users: IUser[]; total: number; page: number; pages: number }> {
+    const skip = (page - 1) * limit;
+    const total = await User.countDocuments();
+    const pages = Math.ceil(total / limit);
+    const users = await User.find({}, "-password")
+      .skip(skip)
+      .limit(limit)
+      .exec();
+    return { users, total, page, pages };
   }
 
   async getUserById(id: string): Promise<IUser | null> {
