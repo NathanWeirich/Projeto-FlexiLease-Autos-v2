@@ -25,5 +25,8 @@ router.put(
   reserveValidation,
   reservationController.updateReservation.bind(reservationController),
 );
-
+router.delete(
+  "/reserve/:id",
+  reservationController.deleteReservation.bind(reservationController),
+);
 export default router;

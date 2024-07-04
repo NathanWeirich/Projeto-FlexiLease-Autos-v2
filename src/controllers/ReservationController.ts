@@ -72,6 +72,24 @@ class ReservationController {
       }
     }
   }
+
+  async deleteReservation(req: Request, res: Response) {
+    const { id } = req.params;
+    try {
+      const deletedReservation =
+        await this.reservationService.deleteReservation(id);
+      if (!deletedReservation) {
+        return res.status(404).send({ error: "Reserve not found" });
+      }
+      res.status(204).send();
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).send({ error: error.message });
+      } else {
+        res.status(400).send({ error: "An unknown error occurred" });
+      }
+    }
+  }
 }
 
 export default ReservationController;

@@ -3,6 +3,7 @@ import Car from "../models/Car";
 import User from "../models/User";
 import { IReservation } from "../interfaces/IReservation";
 import { parse, isWithinInterval, format, addDays, subDays } from "date-fns";
+import mongoose from "mongoose";
 
 export class ReservationService {
   async createReservation(reservationData: IReservation) {
@@ -254,5 +255,12 @@ export class ReservationService {
       end_date: format(updatedReservation.end_date, "dd/MM/yyyy"),
       final_value: updatedReservation.final_value.toFixed(2).replace(".", ","),
     };
+  }
+
+  async deleteReservation(id: string): Promise<IReservation | null> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error("Invalid ID format");
+    }
+    return await Reservation.findByIdAndDelete(id).exec();
   }
 }
