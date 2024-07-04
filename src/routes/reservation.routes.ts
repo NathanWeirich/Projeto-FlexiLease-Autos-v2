@@ -16,5 +16,9 @@ router.get(
   "/reserve",
   reservationController.getReservations.bind(reservationController),
 );
+router.get(
+  "/reserve/:id",
+  reservationController.getReservationById.bind(reservationController),
+);
 
 export default router;

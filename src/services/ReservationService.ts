@@ -117,4 +117,20 @@ export class ReservationService {
 
     return { reservations, total, limit, offset, offsets };
   }
+
+  async getReservationById(id: string): Promise<IReservation | null> {
+    const reservation = await Reservation.findById(id).exec();
+    if (!reservation) {
+      return null;
+    }
+
+    return {
+      id_reserve: reservation._id.toString(),
+      id_user: reservation.id_user.toString(),
+      id_car: reservation.id_car.toString(),
+      start_date: reservation.start_date.toISOString().split("T")[0],
+      end_date: reservation.end_date.toISOString().split("T")[0],
+      final_value: reservation.final_value.toFixed(2),
+    };
+  }
 }
