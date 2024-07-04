@@ -3,5 +3,5 @@ export interface IReservation {
   id_car: string;
   start_date: string;
   end_date: string;
-  finalValue: string;
+  final_value: string;
 }

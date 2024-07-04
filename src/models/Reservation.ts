@@ -1,25 +1,25 @@
 import { Schema, model } from "mongoose";
 
 const ReservationSchema = new Schema({
-  userId: {
+  id_user: {
     type: Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  carId: {
+  id_car: {
     type: Schema.Types.ObjectId,
     ref: "Car",
     required: true,
   },
-  startDate: {
+  start_date: {
     type: Date,
     required: true,
   },
-  endDate: {
+  end_date: {
     type: Date,
     required: true,
   },
-  finalValue: {
+  final_value: {
     type: Number,
     required: true,
   },

@@ -12,5 +12,9 @@ router.post(
   reserveValidation,
   reservationController.createReservation.bind(reservationController),
 );
+router.get(
+  "/reserve",
+  reservationController.getReservations.bind(reservationController),
+);
 
 export default router;

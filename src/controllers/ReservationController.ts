@@ -18,6 +18,24 @@ class ReservationController {
       }
     }
   }
+
+  async getReservations(req: Request, res: Response) {
+    const { page = 1, limit = 10, ...filters } = req.query;
+    try {
+      const paginatedResult = await this.reservationService.getReservations(
+        filters,
+        Number(page),
+        Number(limit),
+      );
+      res.status(200).send(paginatedResult);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(500).send({ error: error.message });
+      } else {
+        res.status(500).send({ error: "An unknown error occurred" });
+      }
+    }
+  }
 }
 
 export default ReservationController;
