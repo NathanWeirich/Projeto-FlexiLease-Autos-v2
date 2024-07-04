@@ -12,12 +12,18 @@ export class CarService {
     query: any,
     page: number = 1,
     limit: number = 10,
-  ): Promise<{ cars: ICar[]; total: number; page: number; pages: number }> {
-    const skip = (page - 1) * limit;
-    const cars = await Car.find(query).limit(limit).skip(skip).exec();
+  ): Promise<{
+    cars: ICar[];
+    total: number;
+    limit: number;
+    offset: number;
+    offsets: number;
+  }> {
+    const offset = (page - 1) * limit;
+    const cars = await Car.find(query).limit(limit).skip(offset).exec();
     const total = await Car.countDocuments(query).exec();
-    const pages = Math.ceil(total / limit);
-    return { cars, total, page, pages };
+    const offsets = Math.ceil(total / limit);
+    return { cars, total, limit, offset, offsets };
   }
 
   async getCarById(id: string): Promise<ICar | null> {
