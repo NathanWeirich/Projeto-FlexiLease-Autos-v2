@@ -53,6 +53,25 @@ class ReservationController {
       }
     }
   }
+
+  async updateReservation(req: Request, res: Response) {
+    const { id } = req.params;
+    const reservationData = req.body;
+    try {
+      const updatedReservation =
+        await this.reservationService.updateReservation(id, reservationData);
+      if (!updatedReservation) {
+        return res.status(404).send({ error: "Reservation not found" });
+      }
+      res.status(200).send(updatedReservation);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).send({ error: error.message });
+      } else {
+        res.status(400).send({ error: "An unknown error occurred" });
+      }
+    }
+  }
 }
 
 export default ReservationController;

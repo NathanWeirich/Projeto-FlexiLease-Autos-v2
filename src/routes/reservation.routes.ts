@@ -20,5 +20,10 @@ router.get(
   "/reserve/:id",
   reservationController.getReservationById.bind(reservationController),
 );
+router.put(
+  "/reserve/:id",
+  reserveValidation,
+  reservationController.updateReservation.bind(reservationController),
+);
 
 export default router;
