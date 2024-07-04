@@ -48,15 +48,21 @@ export class UserService {
   async getAllUsers(
     page: number = 1,
     limit: number = 10,
-  ): Promise<{ users: IUser[]; total: number; page: number; pages: number }> {
-    const skip = (page - 1) * limit;
+  ): Promise<{
+    users: IUser[];
+    total: number;
+    limit: number;
+    offset: number;
+    offsets: number;
+  }> {
+    const offset = (page - 1) * limit;
     const total = await User.countDocuments();
-    const pages = Math.ceil(total / limit);
+    const offsets = Math.ceil(total / limit);
     const users = await User.find({}, "-password")
-      .skip(skip)
+      .skip(offset)
       .limit(limit)
       .exec();
-    return { users, total, page, pages };
+    return { users, total, limit, offset, offsets };
   }
 
   async getUserById(id: string): Promise<IUser | null> {
