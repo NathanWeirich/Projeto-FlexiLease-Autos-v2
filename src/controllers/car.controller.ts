@@ -19,39 +19,31 @@ class CarController {
   }
 
   async getCars(req: Request, res: Response) {
+    const {
+      page = 1,
+      limit = 10,
+      model,
+      color,
+      year,
+      value_per_day,
+      accessories,
+    } = req.query;
+
+    const query: any = {};
+    if (model) query.model = model;
+    if (color) query.color = color;
+    if (year) query.year = year;
+    if (value_per_day) query.value_per_day = value_per_day;
+    if (accessories)
+      query.accessories = { $elemMatch: { description: accessories } };
+
     try {
-      const {
-        model,
-        color,
-        year,
-        value_per_day,
-        accessories,
-        limit = 10,
-        offset = 0,
-      } = req.query;
-
-      const query: any = {};
-
-      if (model) query.model = model;
-      if (color) query.color = color;
-      if (year) query.year = year;
-      if (value_per_day) query.value_per_day = value_per_day;
-      if (accessories)
-        query.accessories = { $elemMatch: { description: accessories } };
-
-      const { cars, total } = await this.carService.getCars(
+      const paginatedResult = await this.carService.getCars(
         query,
-        parseInt(limit as string),
-        parseInt(offset as string),
+        Number(page),
+        Number(limit),
       );
-
-      res.status(200).send({
-        cars,
-        total,
-        limit: parseInt(limit as string),
-        offset: parseInt(offset as string),
-        offsets: Math.ceil(total / parseInt(limit as string)),
-      });
+      res.status(200).send(paginatedResult);
     } catch (error: unknown) {
       if (error instanceof Error) {
         res.status(500).send({ error: error.message });
