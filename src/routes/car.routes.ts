@@ -9,6 +9,11 @@ const carController = container.resolve(CarController);
 /**
  * @swagger
  * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: 'http'
+ *       scheme: 'bearer'
+ *       bearerFormat: 'JWT'
  *   schemas:
  *     Car:
  *       type: object
@@ -55,7 +60,7 @@ const carController = container.resolve(CarController);
  * @swagger
  * tags:
  *   name: Cars
- *   description: API for car management
+ *   description: Car management Routes
  */
 
 /**
@@ -64,6 +69,8 @@ const carController = container.resolve(CarController);
  *   post:
  *     summary: Registers a new car
  *     tags: [Cars]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -84,6 +91,8 @@ router.post("/car", validateCar, carController.registerCar.bind(carController));
  *   get:
  *     summary: Lists all cars
  *     tags: [Cars]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: model
@@ -118,6 +127,8 @@ router.get("/car", carController.getCars.bind(carController));
  *   get:
  *     summary: Gets a car by ID
  *     tags: [Cars]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -145,6 +156,8 @@ router.get("/car/:id", carController.getCarById.bind(carController));
  *   delete:
  *     summary: Deletes a car by ID
  *     tags: [Cars]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -168,6 +181,8 @@ router.delete("/car/:id", carController.deleteCar.bind(carController));
  *   put:
  *     summary: Updates a car by ID
  *     tags: [Cars]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -201,6 +216,8 @@ router.put(
  *   patch:
  *     summary: Updates an accessory of a car by ID
  *     tags: [Cars]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
