@@ -1,4 +1,4 @@
-import { ICar } from "interfaces/ICar";
+import { ICar } from "api/interfaces/ICar";
 import { Schema, model } from "mongoose";
 import CarAccessory from "./CarAccessory";
 

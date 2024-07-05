@@ -1,11 +1,14 @@
+import "reflect-metadata";
 import express from "express";
 import cors from "cors";
 import routes from "./routes/routes";
-import connectDB from "./config/db";
+import connectDB from "./database/config/db";
 import swaggerUi from "swagger-ui-express";
 import swaggerJSDoc from "swagger-jsdoc";
 import fs from "fs";
 import path from "path";
+import "./container";
+import { errorHandler } from "./api/middlewares/errorHandler";
 
 const app = express();
 
@@ -26,7 +29,6 @@ const swaggerOptions = {
       description: "Documentação da API da FlexiLease Autos",
     },
   },
-
   apis: fs.readdirSync(routerDir).map((file) => path.join(routerDir, file)),
 };
 
@@ -35,6 +37,9 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // rotas da aplicação
 app.use(routes);
+
+// Middleware de tratamento de erros
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 

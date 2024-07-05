@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { Request, Response, NextFunction } from "express";
+import createError from "http-errors";
 
 const carSchema = Joi.object({
   model: Joi.string().required().messages({
@@ -9,11 +10,17 @@ const carSchema = Joi.object({
     "string.empty": "Color is required",
   }),
   year: Joi.string()
-    .pattern(/^(19[5-9]\d|20[0-2]\d|2023)$/)
     .required()
+    .custom((value, helpers) => {
+      const year = parseInt(value, 10);
+      if (isNaN(year) || year < 1950 || year > 2023) {
+        return helpers.error("any.invalidYearRange", { value });
+      }
+      return value;
+    })
     .messages({
       "string.empty": "Year is required",
-      "string.pattern.base": "Year must be between 1950 and 2023",
+      "any.invalidYearRange": "Year must be between 1950 and 2023",
     }),
   value_per_day: Joi.number().required().messages({
     "number.base": "Value per day must be a number",
@@ -31,7 +38,7 @@ const carSchema = Joi.object({
     .unique("description")
     .required()
     .messages({
-      "array.mini": "At least one accessory is required",
+      "array.min": "At least one accessory is required",
       "array.unique": "Accessory descriptions must be unique",
     }),
   number_of_passengers: Joi.number().required().messages({
@@ -48,15 +55,10 @@ export const validateCar = (
   const { error } = carSchema.validate(req.body, { abortEarly: false });
   if (error) {
     const details = error.details.map((detail) => ({
+      field: detail.path.join("."),
       message: detail.message,
-      path: detail.path.join("."),
-      type: detail.type,
     }));
-    return res.status(400).json({
-      status: "error",
-      message: "Validation error",
-      details,
-    });
+    return next(createError(400, "Validation error", { details }));
   }
   next();
 };
