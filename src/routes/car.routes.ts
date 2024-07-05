@@ -1,12 +1,11 @@
 import { Router } from "express";
-import CarController from "../controllers/car.controller";
-import { CarService } from "../services/CarService";
+import { container } from "tsyringe";
 import { validateCar } from "../validation/carValidation";
 import { authenticateJWT } from "../middlewares/authenticate";
+import CarController from "../controllers/CarController";
 
 const router = Router();
-const carService = new CarService();
-const carController = new CarController(carService);
+const carController = container.resolve(CarController);
 
 /**
  * @swagger

@@ -3,28 +3,27 @@ import Car from "../models/Car";
 import User from "../models/User";
 import { IReservation } from "../interfaces/IReservation";
 import { parse, isWithinInterval, format, addDays, subDays } from "date-fns";
-import mongoose from "mongoose";
+import { injectable } from "tsyringe";
+import createError from "http-errors";
 
-export class ReservationService {
+@injectable()
+class ReservationService {
   async createReservation(reservationData: IReservation) {
     const { id_user, id_car, start_date, end_date } = reservationData;
 
-    // Verificar se o usuário possui uma carteira de motorista
     const user = await User.findById(id_user);
     if (!user) {
-      throw new Error("User not found");
+      throw createError(404, "User not found");
     }
     if (user.qualified !== "sim") {
-      throw new Error("User is not qualified to make a reservation");
+      throw createError(400, "User is not qualified to make a reservation");
     }
 
-    // Verificar se o carro existe
     const car = await Car.findById(id_car);
     if (!car) {
-      throw new Error("Car not found");
+      throw createError(404, "Car not found");
     }
 
-    // Calcular o valor final
     const days = Math.ceil(
       (parse(end_date, "dd/MM/yyyy", new Date()).getTime() -
         parse(start_date, "dd/MM/yyyy", new Date()).getTime()) /
@@ -32,7 +31,6 @@ export class ReservationService {
     );
     const finalValue = days * car.value_per_day;
 
-    // Verificar se o carro já está reservado no mesmo período
     const existingReservations = await Reservation.find({ id_car });
     existingReservations.forEach((reservation) => {
       const reservedInterval = {
@@ -49,11 +47,13 @@ export class ReservationService {
           reservedInterval,
         )
       ) {
-        throw new Error("The car is already reserved for the given period");
+        throw createError(
+          400,
+          "The car is already reserved for the given period",
+        );
       }
     });
 
-    // Verificar se o usuário já possui uma reserva no mesmo período
     const userReservations = await Reservation.find({ id_user });
     userReservations.forEach((reservation) => {
       const reservedInterval = {
@@ -70,7 +70,8 @@ export class ReservationService {
           reservedInterval,
         )
       ) {
-        throw new Error(
+        throw createError(
+          400,
           "The user already has a reservation for the given period",
         );
       }
@@ -120,11 +121,13 @@ export class ReservationService {
   }
 
   async getReservationById(id: string): Promise<IReservation | null> {
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      throw createError(400, "Invalid ID format");
+    }
     const reservation = await Reservation.findById(id).exec();
     if (!reservation) {
-      return null;
+      throw createError(404, "Reservation not found");
     }
-
     return {
       id_reserve: reservation._id.toString(),
       id_user: reservation.id_user.toString(),
@@ -141,27 +144,23 @@ export class ReservationService {
   ): Promise<IReservation | null> {
     const { id_user, id_car, start_date, end_date } = reservationData;
 
-    // Verificar se o ID é válido
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      throw new Error("Invalid reservation ID");
+      throw createError(400, "Invalid reservation ID");
     }
 
-    // Verificar se o usuário possui uma carteira de motorista
     const user = await User.findById(id_user);
     if (!user) {
-      throw new Error("User not found");
+      throw createError(404, "User not found");
     }
     if (user.qualified !== "sim") {
-      throw new Error("User is not qualified to make a reservation");
+      throw createError(400, "User is not qualified to make a reservation");
     }
 
-    // Verificar se o carro existe
     const car = await Car.findById(id_car);
     if (!car) {
-      throw new Error("Car not found");
+      throw createError(404, "Car not found");
     }
 
-    // Calcular o valor final
     const days = Math.ceil(
       (parse(end_date, "dd/MM/yyyy", new Date()).getTime() -
         parse(start_date, "dd/MM/yyyy", new Date()).getTime()) /
@@ -169,7 +168,6 @@ export class ReservationService {
     );
     const finalValue = days * car.value_per_day;
 
-    // Verificar se o carro já está reservado no mesmo período
     const existingReservations = await Reservation.find({
       id_car,
       _id: { $ne: id },
@@ -189,23 +187,23 @@ export class ReservationService {
           reservedInterval,
         )
       ) {
-        throw new Error("The car is already reserved for the given period");
+        throw createError(
+          400,
+          "The car is already reserved for the given period",
+        );
       }
 
-      // Verificar se o carro tem reserva no dia seguinte
       const nextDay = addDays(reservation.end_date, 1);
       if (isWithinInterval(nextDay, reservedInterval)) {
-        throw new Error("The car is reserved for the next day");
+        throw createError(400, "The car is reserved for the next day");
       }
 
-      // Verificar se o carro tem reserva no dia anterior
       const previousDay = subDays(reservation.start_date, 1);
       if (isWithinInterval(previousDay, reservedInterval)) {
-        throw new Error("The car is reserved for the previous day");
+        throw createError(400, "The car is reserved for the previous day");
       }
     });
 
-    // Verificar se o usuário já possui uma reserva no mesmo período
     const userReservations = await Reservation.find({
       id_user,
       _id: { $ne: id },
@@ -225,7 +223,8 @@ export class ReservationService {
           reservedInterval,
         )
       ) {
-        throw new Error(
+        throw createError(
+          400,
           "The user already has a reservation for the given period",
         );
       }
@@ -244,7 +243,7 @@ export class ReservationService {
     );
 
     if (!updatedReservation) {
-      return null;
+      throw createError(404, "Reservation not found");
     }
 
     return {
@@ -258,9 +257,15 @@ export class ReservationService {
   }
 
   async deleteReservation(id: string): Promise<IReservation | null> {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new Error("Invalid ID format");
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      throw createError(400, "Invalid ID format");
     }
-    return await Reservation.findByIdAndDelete(id).exec();
+    const reservation = await Reservation.findByIdAndDelete(id).exec();
+    if (!reservation) {
+      throw createError(404, "Reservation not found");
+    }
+    return reservation;
   }
 }
+
+export default ReservationService;

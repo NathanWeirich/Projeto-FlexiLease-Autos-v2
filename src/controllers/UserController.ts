@@ -1,20 +1,16 @@
 import { Request, Response } from "express";
 import { injectable, inject } from "tsyringe";
 import createError from "http-errors";
-import ReservationService from "../services/ReservationService";
+import UserService from "../services/UserService";
 
 @injectable()
-class ReservationController {
-  constructor(
-    @inject(ReservationService) private reservationService: ReservationService,
-  ) {}
+class UserController {
+  constructor(@inject(UserService) private userService: UserService) {}
 
-  async createReservation(req: Request, res: Response) {
+  async registerUser(req: Request, res: Response) {
     try {
-      const reservation = await this.reservationService.createReservation(
-        req.body,
-      );
-      res.status(201).json({ reservationId: reservation._id });
+      const user = await this.userService.registerUser(req.body);
+      res.status(201).json(user.toJSON());
     } catch (error: any) {
       if (error.status) {
         res
@@ -26,11 +22,10 @@ class ReservationController {
     }
   }
 
-  async getReservations(req: Request, res: Response) {
-    const { page = 1, limit = 10, ...filters } = req.query;
+  async getAllUsers(req: Request, res: Response) {
+    const { page = 1, limit = 10 } = req.query;
     try {
-      const paginatedResult = await this.reservationService.getReservations(
-        filters,
+      const paginatedResult = await this.userService.getAllUsers(
         Number(page),
         Number(limit),
       );
@@ -46,14 +41,14 @@ class ReservationController {
     }
   }
 
-  async getReservationById(req: Request, res: Response) {
+  async getUserById(req: Request, res: Response) {
     const { id } = req.params;
     try {
-      const reservation = await this.reservationService.getReservationById(id);
-      if (!reservation) {
-        throw createError(404, "Reservation not found");
+      const user = await this.userService.getUserById(id);
+      if (!user) {
+        throw createError(404, "User not found");
       }
-      res.status(200).json(reservation);
+      res.status(200).json(user);
     } catch (error: any) {
       if (error.status) {
         res
@@ -65,16 +60,14 @@ class ReservationController {
     }
   }
 
-  async updateReservation(req: Request, res: Response) {
+  async updateUser(req: Request, res: Response) {
     const { id } = req.params;
-    const reservationData = req.body;
     try {
-      const updatedReservation =
-        await this.reservationService.updateReservation(id, reservationData);
-      if (!updatedReservation) {
-        throw createError(404, "Reservation not found");
+      const updatedUser = await this.userService.updateUser(id, req.body);
+      if (!updatedUser) {
+        throw createError(404, "User not found");
       }
-      res.status(200).json(updatedReservation);
+      res.status(200).json(updatedUser);
     } catch (error: any) {
       if (error.status) {
         res
@@ -86,13 +79,12 @@ class ReservationController {
     }
   }
 
-  async deleteReservation(req: Request, res: Response) {
+  async deleteUser(req: Request, res: Response) {
     const { id } = req.params;
     try {
-      const deletedReservation =
-        await this.reservationService.deleteReservation(id);
-      if (!deletedReservation) {
-        throw createError(404, "Reservation not found");
+      const deletedUser = await this.userService.deleteUser(id);
+      if (!deletedUser) {
+        throw createError(404, "User not found");
       }
       res.status(204).send();
     } catch (error: any) {
@@ -105,6 +97,16 @@ class ReservationController {
       }
     }
   }
+
+  async authenticateUser(req: Request, res: Response) {
+    const { email, password } = req.body;
+    try {
+      const token = await this.userService.authenticateUser(email, password);
+      res.status(200).json({ token });
+    } catch (error: any) {
+      res.status(400).json({ error: "Invalid email or password" });
+    }
+  }
 }
 
-export default ReservationController;
+export default UserController;

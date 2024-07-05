@@ -1,11 +1,10 @@
 import { Router } from "express";
-import UserController from "../controllers/user.controller";
-import { UserService } from "../services/UserService";
+import { container } from "tsyringe";
 import { validateUser } from "../validation/userValidation";
+import UserController from "../controllers/UserController";
 
 const router = Router();
-const userService = new UserService();
-const userController = new UserController(userService);
+const userController = container.resolve(UserController);
 
 /**
  * @swagger
@@ -77,7 +76,6 @@ const userController = new UserController(userService);
  *       400:
  *         description: Invalid data
  */
-
 router.post(
   "/user",
   validateUser,
@@ -109,7 +107,7 @@ router.post(
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/user'
+ *                 $ref: '#/components/schemas/User'
  */
 router.get("/user", userController.getAllUsers.bind(userController));
 

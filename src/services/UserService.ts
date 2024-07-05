@@ -4,30 +4,30 @@ import jwt from "jsonwebtoken";
 import User from "../models/User";
 import { IUser } from "../interfaces/IUser";
 import mongoose from "mongoose";
+import { injectable } from "tsyringe";
+import createError from "http-errors";
 
-export class UserService {
+@injectable()
+class UserService {
   async registerUser(userData: IUser) {
     const { cpf, email, cep, birth, password } = userData;
 
-    // Verificar CPF e e-mail únicos
     const cpfExists = await User.findOne({ cpf });
     if (cpfExists) {
-      throw new Error("CPF already exists");
+      throw createError(409, "CPF already exists");
     }
 
     const emailExists = await User.findOne({ email });
     if (emailExists) {
-      throw new Error("Email already exists");
+      throw createError(409, "Email already exists");
     }
 
-    // Validar idade
     const birthDate = new Date(birth);
     const age = new Date().getFullYear() - birthDate.getFullYear();
     if (age < 18) {
-      throw new Error("User must be at least 18 years old");
+      throw createError(400, "User must be at least 18 years old");
     }
 
-    // Consultar API Via CEP
     const { data } = await axios.get(`https://viacep.com.br/ws/${cep}/json`);
     userData.patio = data.logradouro || "N/A";
     userData.complement = data.complemento || "N/A";
@@ -35,70 +35,55 @@ export class UserService {
     userData.locality = data.localidade || "N/A";
     userData.uf = data.uf || "N/A";
 
-    // Hash da senha
     const salt = await bcrypt.genSalt(10);
     userData.password = await bcrypt.hash(password, salt);
 
-    // Criar usuário
     const user = new User(userData);
     await user.save();
     return user;
   }
 
-  async getAllUsers(
-    page: number = 1,
-    limit: number = 10,
-  ): Promise<{
-    users: IUser[];
-    total: number;
-    limit: number;
-    offset: number;
-    offsets: number;
-  }> {
+  async getAllUsers(page: number = 1, limit: number = 10) {
     const offset = (page - 1) * limit;
     const total = await User.countDocuments();
-    const offsets = Math.ceil(total / limit);
     const users = await User.find({}, "-password")
       .skip(offset)
       .limit(limit)
       .exec();
-    return { users, total, limit, offset, offsets };
+    return { users, total, limit, offset, offsets: Math.ceil(total / limit) };
   }
 
-  async getUserById(id: string): Promise<IUser | null> {
+  async getUserById(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new Error("Invalid ID format");
+      throw createError(400, "Invalid ID format");
     }
-    return await User.findById(id, "-password").exec();
+    const user = await User.findById(id, "-password").exec();
+    if (!user) throw createError(404, "User not found");
+    return user;
   }
 
-  async updateUser(
-    id: string,
-    userData: Partial<IUser>,
-  ): Promise<IUser | null> {
+  async updateUser(id: string, userData: Partial<IUser>) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new Error("Invalid ID format");
+      throw createError(400, "Invalid ID format");
     }
 
-    // Verificar se o e-mail já existe para outro usuário
     if (userData.email) {
       const emailExists = await User.findOne({
         email: userData.email,
         _id: { $ne: id },
       });
       if (emailExists) {
-        throw new Error("Email already exists");
+        throw createError(409, "Email already exists");
       }
     }
 
-    // Verificar se o CPF já existe para outro usuário
     if (userData.cpf) {
       const cpfExists = await User.findOne({
         cpf: userData.cpf,
         _id: { $ne: id },
       });
       if (cpfExists) {
-        throw new Error("CPF already exists");
+        throw createError(409, "CPF already exists");
       }
     }
 
@@ -107,28 +92,31 @@ export class UserService {
       userData.password = await bcrypt.hash(userData.password, salt);
     }
 
-    return await User.findByIdAndUpdate(id, userData, { new: true }).exec();
+    const updatedUser = await User.findByIdAndUpdate(id, userData, {
+      new: true,
+    }).exec();
+    if (!updatedUser) throw createError(404, "User not found");
+    return updatedUser;
   }
 
-  async deleteUser(id: string): Promise<IUser | null> {
+  async deleteUser(id: string) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new Error("Invalid ID format");
+      throw createError(400, "Invalid ID format");
     }
-    return await User.findByIdAndDelete(id).exec();
+    const user = await User.findByIdAndDelete(id).exec();
+    if (!user) throw createError(404, "User not found");
+    return user;
   }
 
-  async authenticateUser(
-    email: string,
-    password: string,
-  ): Promise<string | null> {
+  async authenticateUser(email: string, password: string) {
     const user = await User.findOne({ email });
     if (!user) {
-      throw new Error("Invalid email or password");
+      throw createError(401, "Invalid email or password");
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      throw new Error("Invalid email or password");
+      throw createError(401, "Invalid email or password");
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {
@@ -137,3 +125,5 @@ export class UserService {
     return token;
   }
 }
+
+export default UserService;
