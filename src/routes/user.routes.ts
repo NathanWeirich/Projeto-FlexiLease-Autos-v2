@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { Router } from "express";
 import { container } from "tsyringe";
 import { validateUser } from "../api/validation/userValidation";
