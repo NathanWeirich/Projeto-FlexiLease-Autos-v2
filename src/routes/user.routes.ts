@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { container } from "tsyringe";
-import { validateUser } from "../validation/userValidation";
-import UserController from "../controllers/UserController";
+import { validateUser } from "../api/validation/userValidation";
+import UserController from "../api/controllers/UserController";
 
 const router = Router();
 const userController = container.resolve(UserController);

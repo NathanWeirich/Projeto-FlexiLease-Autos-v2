@@ -2,13 +2,13 @@ import "reflect-metadata";
 import express from "express";
 import cors from "cors";
 import routes from "./routes/routes";
-import connectDB from "./config/db";
+import connectDB from "./database/config/db";
 import swaggerUi from "swagger-ui-express";
 import swaggerJSDoc from "swagger-jsdoc";
 import fs from "fs";
 import path from "path";
 import "./container";
-import { errorHandler } from "./middlewares/errorHandler";
+import { errorHandler } from "./api/middlewares/errorHandler";
 
 const app = express();
 

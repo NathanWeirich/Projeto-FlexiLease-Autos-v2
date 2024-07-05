@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { container } from "tsyringe";
-import { reserveValidation } from "../validation/reserveValidation";
-import ReservationController from "../controllers/ReservationController";
+import { reserveValidation } from "../api/validation/reserveValidation";
+import ReservationController from "../api/controllers/ReservationController";
 
 const router = Router();
 const reservationController = container.resolve(ReservationController);

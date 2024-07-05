@@ -1,11 +1,11 @@
 import "reflect-metadata";
 import { container } from "tsyringe";
-import UserService from "./services/UserService";
-import UserController from "./controllers/UserController";
-import CarService from "./services/CarService";
-import CarController from "./controllers/CarController";
-import ReservationService from "./services/ReservationService";
-import ReservationController from "./controllers/ReservationController";
+import UserService from "./api/services/UserService";
+import UserController from "./api/controllers/UserController";
+import CarService from "./api/services/CarService";
+import CarController from "./api/controllers/CarController";
+import ReservationService from "./api/services/ReservationService";
+import ReservationController from "./api/controllers/ReservationController";
 
 container.registerSingleton<UserService>(UserService);
 container.registerSingleton<UserController>(UserController);

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { container } from "tsyringe";
-import { validateCar } from "../validation/carValidation";
-import CarController from "../controllers/CarController";
+import { validateCar } from "../api/validation/carValidation";
+import CarController from "../api/controllers/CarController";
 
 const router = Router();
 const carController = container.resolve(CarController);
