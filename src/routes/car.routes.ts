@@ -2,6 +2,7 @@ import { Router } from "express";
 import CarController from "../controllers/car.controller";
 import { CarService } from "../services/CarService";
 import { validateCar } from "../validation/carValidation";
+import { authenticateJWT } from "../middlewares/authenticate";
 
 const router = Router();
 const carService = new CarService();
@@ -77,7 +78,12 @@ const carController = new CarController(carService);
  *       400:
  *         description: Invalid data
  */
-router.post("/car", validateCar, carController.registerCar.bind(carController));
+router.post(
+  "/car",
+  authenticateJWT,
+  validateCar,
+  carController.registerCar.bind(carController),
+);
 
 /**
  * @swagger
@@ -111,7 +117,7 @@ router.post("/car", validateCar, carController.registerCar.bind(carController));
  *               items:
  *                 $ref: '#/components/schemas/Car'
  */
-router.get("/car", carController.getCars.bind(carController));
+router.get("/car", authenticateJWT, carController.getCars.bind(carController));
 
 /**
  * @swagger
@@ -138,7 +144,11 @@ router.get("/car", carController.getCars.bind(carController));
  *       404:
  *         description: Car not found
  */
-router.get("/car/:id", carController.getCarById.bind(carController));
+router.get(
+  "/car/:id",
+  authenticateJWT,
+  carController.getCarById.bind(carController),
+);
 
 /**
  * @swagger
@@ -161,7 +171,11 @@ router.get("/car/:id", carController.getCarById.bind(carController));
  *       404:
  *         description: Car not found
  */
-router.delete("/car/:id", carController.deleteCar.bind(carController));
+router.delete(
+  "/car/:id",
+  authenticateJWT,
+  carController.deleteCar.bind(carController),
+);
 
 /**
  * @swagger
@@ -192,6 +206,7 @@ router.delete("/car/:id", carController.deleteCar.bind(carController));
  */
 router.put(
   "/car/:id",
+  authenticateJWT,
   validateCar,
   carController.updateCar.bind(carController),
 );
@@ -236,6 +251,7 @@ router.put(
  */
 router.patch(
   "/car/:id/accessories/:accessoryId",
+  authenticateJWT,
   carController.updateAccessory.bind(carController),
 );
 
