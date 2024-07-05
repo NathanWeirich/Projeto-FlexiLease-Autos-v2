@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { container } from "tsyringe";
 import { validateCar } from "../validation/carValidation";
-import { authenticateJWT } from "../middlewares/authenticate";
 import CarController from "../controllers/CarController";
 
 const router = Router();
@@ -77,12 +76,7 @@ const carController = container.resolve(CarController);
  *       400:
  *         description: Invalid data
  */
-router.post(
-  "/car",
-  authenticateJWT,
-  validateCar,
-  carController.registerCar.bind(carController),
-);
+router.post("/car", validateCar, carController.registerCar.bind(carController));
 
 /**
  * @swagger
@@ -116,7 +110,7 @@ router.post(
  *               items:
  *                 $ref: '#/components/schemas/Car'
  */
-router.get("/car", authenticateJWT, carController.getCars.bind(carController));
+router.get("/car", carController.getCars.bind(carController));
 
 /**
  * @swagger
@@ -143,11 +137,7 @@ router.get("/car", authenticateJWT, carController.getCars.bind(carController));
  *       404:
  *         description: Car not found
  */
-router.get(
-  "/car/:id",
-  authenticateJWT,
-  carController.getCarById.bind(carController),
-);
+router.get("/car/:id", carController.getCarById.bind(carController));
 
 /**
  * @swagger
@@ -170,11 +160,7 @@ router.get(
  *       404:
  *         description: Car not found
  */
-router.delete(
-  "/car/:id",
-  authenticateJWT,
-  carController.deleteCar.bind(carController),
-);
+router.delete("/car/:id", carController.deleteCar.bind(carController));
 
 /**
  * @swagger
@@ -205,7 +191,6 @@ router.delete(
  */
 router.put(
   "/car/:id",
-  authenticateJWT,
   validateCar,
   carController.updateCar.bind(carController),
 );
@@ -250,7 +235,6 @@ router.put(
  */
 router.patch(
   "/car/:id/accessories/:accessoryId",
-  authenticateJWT,
   carController.updateAccessory.bind(carController),
 );
 

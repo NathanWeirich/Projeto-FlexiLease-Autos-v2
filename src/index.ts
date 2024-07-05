@@ -8,6 +8,7 @@ import swaggerJSDoc from "swagger-jsdoc";
 import fs from "fs";
 import path from "path";
 import "./container";
+import { errorHandler } from "./middlewares/errorHandler";
 
 const app = express();
 
@@ -36,6 +37,9 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // rotas da aplicação
 app.use(routes);
+
+// Middleware de tratamento de erros
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 

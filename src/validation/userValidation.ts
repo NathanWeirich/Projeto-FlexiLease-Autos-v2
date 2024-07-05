@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { Request, Response, NextFunction } from "express";
+import createError from "http-errors";
 import { isValid, parse, differenceInYears } from "date-fns";
 
 const userSchema = Joi.object({
@@ -62,15 +63,10 @@ export const validateUser = (
   const { error } = userSchema.validate(req.body, { abortEarly: false });
   if (error) {
     const details = error.details.map((detail) => ({
-      message: detail.message,
       field: detail.path.join("."),
-      type: detail.type,
+      message: detail.message,
     }));
-    return res.status(400).json({
-      status: "error",
-      message: "Validation error",
-      details,
-    });
+    return next(createError(400, "Validation error", { details }));
   }
   next();
 };

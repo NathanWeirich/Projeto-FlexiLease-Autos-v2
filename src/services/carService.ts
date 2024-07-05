@@ -55,14 +55,14 @@ class CarService {
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       throw createError(400, "Invalid ID format");
     }
-    const car = await Car.findByIdAndUpdate(id, carData, {
+    const updatedCar = await Car.findByIdAndUpdate(id, carData, {
       new: true,
       runValidators: true,
     }).exec();
-    if (!car) {
+    if (!updatedCar) {
       throw createError(404, "Car not found");
     }
-    return car;
+    return updatedCar;
   }
 
   async updateAccessory(

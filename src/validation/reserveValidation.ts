@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { Request, Response, NextFunction } from "express";
+import createError from "http-errors";
 
 const reservationSchema = Joi.object({
   id_user: Joi.string().required().messages({
@@ -32,15 +33,10 @@ export const reserveValidation = (
   const { error } = reservationSchema.validate(req.body, { abortEarly: false });
   if (error) {
     const details = error.details.map((detail) => ({
+      field: detail.path.join("."),
       message: detail.message,
-      path: detail.path.join("."),
-      type: detail.type,
     }));
-    return res.status(400).json({
-      status: "error",
-      message: "Validation error",
-      details,
-    });
+    return next(createError(400, "Validation error", { details }));
   }
   next();
 };

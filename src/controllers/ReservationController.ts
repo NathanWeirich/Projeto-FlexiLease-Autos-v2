@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { injectable, inject } from "tsyringe";
 import createError from "http-errors";
 import ReservationService from "../services/ReservationService";
@@ -9,24 +9,18 @@ class ReservationController {
     @inject(ReservationService) private reservationService: ReservationService,
   ) {}
 
-  async createReservation(req: Request, res: Response) {
+  async createReservation(req: Request, res: Response, next: NextFunction) {
     try {
       const reservation = await this.reservationService.createReservation(
         req.body,
       );
       res.status(201).json({ reservationId: reservation._id });
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 
-  async getReservations(req: Request, res: Response) {
+  async getReservations(req: Request, res: Response, next: NextFunction) {
     const { page = 1, limit = 10, ...filters } = req.query;
     try {
       const paginatedResult = await this.reservationService.getReservations(
@@ -36,17 +30,11 @@ class ReservationController {
       );
       res.status(200).json(paginatedResult);
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 
-  async getReservationById(req: Request, res: Response) {
+  async getReservationById(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
       const reservation = await this.reservationService.getReservationById(id);
@@ -55,17 +43,11 @@ class ReservationController {
       }
       res.status(200).json(reservation);
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 
-  async updateReservation(req: Request, res: Response) {
+  async updateReservation(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     const reservationData = req.body;
     try {
@@ -76,17 +58,11 @@ class ReservationController {
       }
       res.status(200).json(updatedReservation);
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 
-  async deleteReservation(req: Request, res: Response) {
+  async deleteReservation(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
       const deletedReservation =
@@ -96,13 +72,7 @@ class ReservationController {
       }
       res.status(204).send();
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 }

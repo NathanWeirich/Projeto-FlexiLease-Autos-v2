@@ -4,8 +4,8 @@ import jwt from "jsonwebtoken";
 import User from "../models/User";
 import { IUser } from "../interfaces/IUser";
 import mongoose from "mongoose";
-import { injectable } from "tsyringe";
 import createError from "http-errors";
+import { injectable } from "tsyringe";
 
 @injectable()
 class UserService {
@@ -43,26 +43,41 @@ class UserService {
     return user;
   }
 
-  async getAllUsers(page: number = 1, limit: number = 10) {
+  async getAllUsers(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{
+    users: IUser[];
+    total: number;
+    limit: number;
+    offset: number;
+    offsets: number;
+  }> {
     const offset = (page - 1) * limit;
     const total = await User.countDocuments();
+    const offsets = Math.ceil(total / limit);
     const users = await User.find({}, "-password")
       .skip(offset)
       .limit(limit)
       .exec();
-    return { users, total, limit, offset, offsets: Math.ceil(total / limit) };
+    return { users, total, limit, offset, offsets };
   }
 
-  async getUserById(id: string) {
+  async getUserById(id: string): Promise<IUser | null> {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw createError(400, "Invalid ID format");
     }
     const user = await User.findById(id, "-password").exec();
-    if (!user) throw createError(404, "User not found");
+    if (!user) {
+      throw createError(404, "User not found");
+    }
     return user;
   }
 
-  async updateUser(id: string, userData: Partial<IUser>) {
+  async updateUser(
+    id: string,
+    userData: Partial<IUser>,
+  ): Promise<IUser | null> {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw createError(400, "Invalid ID format");
     }
@@ -95,28 +110,35 @@ class UserService {
     const updatedUser = await User.findByIdAndUpdate(id, userData, {
       new: true,
     }).exec();
-    if (!updatedUser) throw createError(404, "User not found");
+    if (!updatedUser) {
+      throw createError(404, "User not found");
+    }
     return updatedUser;
   }
 
-  async deleteUser(id: string) {
+  async deleteUser(id: string): Promise<IUser | null> {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw createError(400, "Invalid ID format");
     }
     const user = await User.findByIdAndDelete(id).exec();
-    if (!user) throw createError(404, "User not found");
+    if (!user) {
+      throw createError(404, "User not found");
+    }
     return user;
   }
 
-  async authenticateUser(email: string, password: string) {
+  async authenticateUser(
+    email: string,
+    password: string,
+  ): Promise<string | null> {
     const user = await User.findOne({ email });
     if (!user) {
-      throw createError(401, "Invalid email or password");
+      throw createError(400, "Invalid email or password");
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      throw createError(401, "Invalid email or password");
+      throw createError(400, "Invalid email or password");
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {

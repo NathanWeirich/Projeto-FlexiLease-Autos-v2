@@ -1,28 +1,22 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { injectable, inject } from "tsyringe";
-import createError from "http-errors";
 import UserService from "../services/UserService";
+import createError from "http-errors";
 
 @injectable()
 class UserController {
   constructor(@inject(UserService) private userService: UserService) {}
 
-  async registerUser(req: Request, res: Response) {
+  async registerUser(req: Request, res: Response, next: NextFunction) {
     try {
       const user = await this.userService.registerUser(req.body);
       res.status(201).json(user.toJSON());
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 
-  async getAllUsers(req: Request, res: Response) {
+  async getAllUsers(req: Request, res: Response, next: NextFunction) {
     const { page = 1, limit = 10 } = req.query;
     try {
       const paginatedResult = await this.userService.getAllUsers(
@@ -31,17 +25,11 @@ class UserController {
       );
       res.status(200).json(paginatedResult);
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 
-  async getUserById(req: Request, res: Response) {
+  async getUserById(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
       const user = await this.userService.getUserById(id);
@@ -50,17 +38,11 @@ class UserController {
       }
       res.status(200).json(user);
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 
-  async updateUser(req: Request, res: Response) {
+  async updateUser(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
       const updatedUser = await this.userService.updateUser(id, req.body);
@@ -69,17 +51,11 @@ class UserController {
       }
       res.status(200).json(updatedUser);
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 
-  async deleteUser(req: Request, res: Response) {
+  async deleteUser(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
       const deletedUser = await this.userService.deleteUser(id);
@@ -88,23 +64,17 @@ class UserController {
       }
       res.status(204).send();
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 
-  async authenticateUser(req: Request, res: Response) {
+  async authenticateUser(req: Request, res: Response, next: NextFunction) {
     const { email, password } = req.body;
     try {
       const token = await this.userService.authenticateUser(email, password);
       res.status(200).json({ token });
     } catch (error: any) {
-      res.status(400).json({ error: "Invalid email or password" });
+      next(error);
     }
   }
 }

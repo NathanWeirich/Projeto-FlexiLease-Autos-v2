@@ -3,14 +3,16 @@ import Car from "../models/Car";
 import User from "../models/User";
 import { IReservation } from "../interfaces/IReservation";
 import { parse, isWithinInterval, format, addDays, subDays } from "date-fns";
-import { injectable } from "tsyringe";
+import mongoose from "mongoose";
 import createError from "http-errors";
+import { injectable } from "tsyringe";
 
 @injectable()
 class ReservationService {
   async createReservation(reservationData: IReservation) {
     const { id_user, id_car, start_date, end_date } = reservationData;
 
+    // Verificar se o usuário possui uma carteira de motorista
     const user = await User.findById(id_user);
     if (!user) {
       throw createError(404, "User not found");
@@ -19,11 +21,13 @@ class ReservationService {
       throw createError(400, "User is not qualified to make a reservation");
     }
 
+    // Verificar se o carro existe
     const car = await Car.findById(id_car);
     if (!car) {
       throw createError(404, "Car not found");
     }
 
+    // Calcular o valor final
     const days = Math.ceil(
       (parse(end_date, "dd/MM/yyyy", new Date()).getTime() -
         parse(start_date, "dd/MM/yyyy", new Date()).getTime()) /
@@ -31,6 +35,7 @@ class ReservationService {
     );
     const finalValue = days * car.value_per_day;
 
+    // Verificar se o carro já está reservado no mesmo período
     const existingReservations = await Reservation.find({ id_car });
     existingReservations.forEach((reservation) => {
       const reservedInterval = {
@@ -54,6 +59,7 @@ class ReservationService {
       }
     });
 
+    // Verificar se o usuário já possui uma reserva no mesmo período
     const userReservations = await Reservation.find({ id_user });
     userReservations.forEach((reservation) => {
       const reservedInterval = {
@@ -121,13 +127,14 @@ class ReservationService {
   }
 
   async getReservationById(id: string): Promise<IReservation | null> {
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       throw createError(400, "Invalid ID format");
     }
     const reservation = await Reservation.findById(id).exec();
     if (!reservation) {
       throw createError(404, "Reservation not found");
     }
+
     return {
       id_reserve: reservation._id.toString(),
       id_user: reservation.id_user.toString(),
@@ -144,7 +151,7 @@ class ReservationService {
   ): Promise<IReservation | null> {
     const { id_user, id_car, start_date, end_date } = reservationData;
 
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       throw createError(400, "Invalid reservation ID");
     }
 
@@ -257,7 +264,7 @@ class ReservationService {
   }
 
   async deleteReservation(id: string): Promise<IReservation | null> {
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       throw createError(400, "Invalid ID format");
     }
     const reservation = await Reservation.findByIdAndDelete(id).exec();

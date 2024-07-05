@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { injectable, inject } from "tsyringe";
 import mongoose from "mongoose";
 import createError from "http-errors";
@@ -8,22 +8,16 @@ import CarService from "../services/CarService";
 class CarController {
   constructor(@inject(CarService) private carService: CarService) {}
 
-  async registerCar(req: Request, res: Response) {
+  async registerCar(req: Request, res: Response, next: NextFunction) {
     try {
       const car = await this.carService.registerCar(req.body);
       res.status(201).json(car);
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 
-  async getCars(req: Request, res: Response) {
+  async getCars(req: Request, res: Response, next: NextFunction) {
     const {
       page = 1,
       limit = 10,
@@ -50,21 +44,15 @@ class CarController {
       );
       res.status(200).json(paginatedResult);
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 
-  async getCarById(req: Request, res: Response) {
+  async getCarById(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid ID format" });
+      return next(createError(400, "Invalid ID format"));
     }
 
     try {
@@ -74,21 +62,15 @@ class CarController {
       }
       res.status(200).json(car);
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 
-  async deleteCar(req: Request, res: Response) {
+  async deleteCar(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid ID format" });
+      return next(createError(400, "Invalid ID format"));
     }
 
     try {
@@ -98,21 +80,15 @@ class CarController {
       }
       res.status(204).send();
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 
-  async updateCar(req: Request, res: Response) {
+  async updateCar(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid ID format" });
+      return next(createError(400, "Invalid ID format"));
     }
 
     try {
@@ -122,17 +98,11 @@ class CarController {
       }
       res.status(200).json(updatedCar);
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 
-  async updateAccessory(req: Request, res: Response) {
+  async updateAccessory(req: Request, res: Response, next: NextFunction) {
     const { id, accessoryId } = req.params;
     const { description } = req.body;
 
@@ -140,11 +110,11 @@ class CarController {
       !mongoose.Types.ObjectId.isValid(id) ||
       !mongoose.Types.ObjectId.isValid(accessoryId)
     ) {
-      return res.status(400).json({ error: "Invalid ID format" });
+      return next(createError(400, "Invalid ID format"));
     }
 
     if (!description) {
-      return res.status(400).json({ error: "Description is required" });
+      return next(createError(400, "Description is required"));
     }
 
     try {
@@ -158,13 +128,7 @@ class CarController {
       }
       res.status(200).json({ car: updatedCar, accessoryId });
     } catch (error: any) {
-      if (error.status) {
-        res
-          .status(error.status)
-          .json({ code: error.status, message: error.message });
-      } else {
-        res.status(500).json({ code: 500, error: error.message.toString() });
-      }
+      next(error);
     }
   }
 }
