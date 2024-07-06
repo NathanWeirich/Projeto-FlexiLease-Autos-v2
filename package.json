@@ -2,10 +2,10 @@
   "name": "projeto-flexilease-autos",
   "version": "1.0.0",
   "description": "API para aluguel de carros",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules src/index.ts",
-    "start": "node ./dist/src/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules src/server.ts",
+    "start": "node ./dist/src/server.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
