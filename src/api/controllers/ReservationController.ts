@@ -14,7 +14,7 @@ class ReservationController {
       const reservation = await this.reservationService.createReservation(
         req.body,
       );
-      res.status(201).json({ reservationId: reservation.id_reserve });
+      res.status(201).json({ reserveId: reservation.id_reserve });
     } catch (error: any) {
       next(error);
     }
