@@ -15,5 +15,12 @@ const UserSchema = new Schema({
   uf: { type: String, required: true, default: "N/A" },
 });
 
+UserSchema.set("toJSON", {
+  transform: (doc, ret) => {
+    delete ret.__v;
+    return ret;
+  },
+});
+
 const User = model("User", UserSchema);
 export default User;

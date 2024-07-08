@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import axios from "axios";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";

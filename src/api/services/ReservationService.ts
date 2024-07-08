@@ -91,8 +91,15 @@ class ReservationService {
       final_value: finalValue,
     });
 
-    await reservation.save();
-    return reservation;
+    const savedReservation = await reservation.save();
+    return {
+      id_reserve: savedReservation._id.toString(),
+      id_user: savedReservation.id_user.toString(),
+      id_car: savedReservation.id_car.toString(),
+      start_date: format(savedReservation.start_date, "dd/MM/yyyy"),
+      end_date: format(savedReservation.end_date, "dd/MM/yyyy"),
+      final_value: savedReservation.final_value.toFixed(2).replace(".", ","),
+    };
   }
 
   async getReservations(
@@ -271,7 +278,15 @@ class ReservationService {
     if (!reservation) {
       throw createError(404, "Reservation not found");
     }
-    return reservation;
+
+    return {
+      id_reserve: reservation._id.toString(),
+      id_user: reservation.id_user.toString(),
+      id_car: reservation.id_car.toString(),
+      start_date: format(reservation.start_date, "dd/MM/yyyy"),
+      end_date: format(reservation.end_date, "dd/MM/yyyy"),
+      final_value: reservation.final_value.toFixed(2).replace(".", ","),
+    };
   }
 }
 

@@ -1,4 +1,4 @@
-import { ICarAccessory } from "../api/interfaces/ICarAccessory";
+import { ICarAccessory } from "../interfaces/ICarAccessory";
 import mongoose from "mongoose";
 
 const { Schema } = mongoose;

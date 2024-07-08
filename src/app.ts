@@ -7,8 +7,8 @@ import swaggerUi from "swagger-ui-express";
 import swaggerJSDoc from "swagger-jsdoc";
 import fs from "fs";
 import path from "path";
-import "./container";
 import { errorHandler } from "./api/middlewares/errorHandler";
+import "./container";
 
 const app = express();
 
@@ -41,9 +41,4 @@ app.use(routes);
 // Middleware de tratamento de erros
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
-  console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
-});
+export default app;
