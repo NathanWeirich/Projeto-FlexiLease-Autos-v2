@@ -98,7 +98,7 @@ describe("Car Routes", () => {
 
   it("should return 404 for non-existent car ID", async () => {
     const response = await request(app)
-      .get("/api/v1/car/60d0fe4f5311236100000000")
+      .get("/api/v1/car/668c0d8388ac3c8c8135284b")
       .set("Authorization", `Bearer ${TOKEN}`);
     expect(response.status).toBe(404);
   });

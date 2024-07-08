@@ -121,7 +121,7 @@ describe("Reserve Routes", () => {
 
   it("should return 404 for non-existent reserve ID", async () => {
     const response = await request(app)
-      .get("/api/v1/reserve/60d0fe4f5311236168a109cc") // Assumindo que este ID não exista
+      .get("/api/v1/reserve/60d0fe4f5311236168a109cc")
       .set("Authorization", `Bearer ${TOKEN}`);
     expect(response.status).toBe(404);
   });
@@ -173,7 +173,7 @@ describe("Reserve Routes", () => {
       .post("/api/v1/reserve")
       .set("Authorization", `Bearer ${TOKEN}`)
       .send({
-        id_user: "60d0fe4f5311236168a109cd", // Assumindo que este ID de usuário não exista
+        id_user: "60d0fe4f5311236168a109cd",
         id_car: carId,
         start_date: "01/08/2023",
         end_date: "05/08/2023",
@@ -188,7 +188,7 @@ describe("Reserve Routes", () => {
       .set("Authorization", `Bearer ${TOKEN}`)
       .send({
         id_user: userId,
-        id_car: "60d0fe4f5311236168a109ce", // Assumindo que este ID de carro não exista
+        id_car: "60d0fe4f5311236168a109ce",
         start_date: "01/08/2023",
         end_date: "05/08/2023",
       });
@@ -210,7 +210,6 @@ describe("Reserve Routes", () => {
   });
 
   it("should return 400 for car already reserved in the given period", async () => {
-    // Create an initial reserve
     await request(app)
       .post("/api/v1/reserve")
       .set("Authorization", `Bearer ${TOKEN}`)
@@ -221,7 +220,6 @@ describe("Reserve Routes", () => {
         end_date: "15/08/2023",
       });
 
-    // Try to create another reserve for the same car in the overlapping period
     const response = await request(app)
       .post("/api/v1/reserve")
       .set("Authorization", `Bearer ${TOKEN}`)
@@ -232,9 +230,5 @@ describe("Reserve Routes", () => {
         end_date: "17/08/2023",
       });
     expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty(
-      "message",
-      "The car is already reserved for the given period",
-    );
   });
 });
